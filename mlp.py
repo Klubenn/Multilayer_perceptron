@@ -25,17 +25,40 @@ class Model:
                     hidden_features: int,
                     activation_function,
                     ):
+        """
+        Creates matrices for weights, biases and neuron outputs either with
+        initialized values or just with zeroes.
+        :param input_features: number of input features (neurons)
+        :param output_features: number of output features (neurons)
+        :param hidden_layers: number of hidden layers
+        :param hidden_features: number of features (neurons) in each hidden layer
+        :param activation_function: activation function for neuron output
+        """
         self.input_features = input_features
         self.output_features = output_features
         self.hidden_layers = hidden_layers
         self.hidden_features = hidden_features
         self.activation_function = activation_function
 
-        self.weights = self._create_layers(initialize=True)
-        self.biases = np.empty(hidden_layers + 1, dtype='float32')
-        self.neurons_outputs = self._create_layers(initialize=False)
+        self.weights = self._create_matrices(initialize=True)
+        self.biases = self._create_vectors(initialize=True)
+        self.neurons_outputs = self._create_vectors(initialize=False)
+        self.results = self._create_vectors(initialize=False)
+        self.error = []
 
-    def _create_layers(self, initialize: bool):
+    def _create_matrices(self, initialize: bool) -> dict:
+        """
+        Creates the dictionary with the keys as numbers from 0 to the number
+        of layers and the values are the matrices with specific shape.
+        The total amount of dict keys equals to the number of hidden
+        layers plus one. The shape of the matrix for each layer is the
+        following: the number of rows equals to the number of neurons to the
+        right and the number of columns equals to the number of neurons to the
+        left. The matrix is either initialized with zeros or with random float
+        numbers depending on the value of the argument.
+        :param initialize: bool
+        :return: dict
+        """
         layers = {}
         for i in range(self.hidden_layers + 1):
             # number of matrix rows is equal to the number of input neurons (to the right)
@@ -48,18 +71,42 @@ class Model:
                 layers[i] = np.zeros((rows, columns), dtype='float32')
         return layers
 
-    def calculate_neuron_input(self, layer, neuron_number):
+    def _create_vectors(self, initialize: bool) -> dict:
+        """
+        Creates the dictionary with the keys as numbers from 0 to the number
+        of layers and the values are the vectors. The total amount of dict keys
+        equals to the number of hidden layers plus one. The length of the
+        vector for each layer equals to the number of neurons of the current
+        layer. Input layer is layer 0 and the last layer is the final hidden
+        layer. The vector is either initialized with zeros or with random float
+        numbers depending on the value of the argument.
+        :param initialize: bool
+        :return: dict
+        """
+        layers = {}
+        for i in range(self.hidden_layers + 1):
+            length = self.input_features if i == 0 else self.hidden_features
+            if initialize:
+                layers[i] = np.empty(length, dtype='float32')
+            else:
+                layers[i] = np.zeros(length, dtype='float32')
+        return layers
 
+    def calculate_perceptrons_in_layer(self, layer, neuron_number):
+
+        pass
 
 
     def forward_pass(self, data):
         pass
 
-    def calculate_loss(self):
-        pass
+    def calculate_error(self, labels):
+        error = np.count_nonzero(self.results == labels)
+        self.error.append(error)
 
     def backpropagation(self, error):
         pass
+
 
 def plot(X: pd.DataFrame, labels):
     plt.scatter(x=X.loc[:, 2],
